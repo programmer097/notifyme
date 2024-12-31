@@ -7,15 +7,23 @@ const socket = io("http://localhost:4000");
 function App() {
   const [notifications, setNotifications] = useState<{ message: string }[]>([]);
   const [message, setMessage] = useState("");
+  const [department, setDepartment] = useState("sales"); // Example department
 
   useEffect(() => {
+    // Join the department room
+    socket.emit("joinDepartment", department);
+
     socket.on("receiveNotification", (data) => {
       setNotifications((prev) => [...prev, data]);
     });
-  }, []);
+
+    return () => {
+      socket.off("receiveNotification");
+    };
+  }, [department]);
 
   const sendNotification = () => {
-    const data = { department: "non-admin", message };
+    const data = { department, message };
     socket.emit("sendNotification", data);
     setMessage("");
   };

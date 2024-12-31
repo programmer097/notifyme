@@ -41,12 +41,19 @@ const Notification = mongoose.model<INotification>(
 io.on("connection", (socket) => {
   console.log("A user connected");
 
+  // Join a room based on department
+  socket.on("joinDepartment", (department: string) => {
+    socket.join(department);
+    console.log(`User joined department: ${department}`);
+  });
+
+  // Send notification to a specific department
   socket.on(
     "sendNotification",
     async (data: { department: string; message: string }) => {
       const notification = new Notification(data);
       await notification.save();
-      io.emit("receiveNotification", data);
+      io.to(data.department).emit("receiveNotification", data);
     }
   );
 
