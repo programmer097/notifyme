@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "build": "npm run build -w frontend && npm run build -w backend",
-    "start:react": "npm start -w frontend",
-    "start:node": "ts-node src/index.ts -w backend"
+    "dev:react": "npm start -w frontend",
+    "dev:node": "npm run dev -w backend"
   },
   "keywords": [],
   "author": "",
@@ -14,5 +14,12 @@
   "workspaces": [
     "backend/",
     "frontend/"
-  ]
+  ],
+  "dependencies": {
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "@types/socket.io": "^3.0.1"
+  }
 }

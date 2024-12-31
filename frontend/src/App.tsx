@@ -1,24 +1,40 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import io from "socket.io-client";
+import "./App.css";
+
+const socket = io("http://localhost:4000");
 
 function App() {
+  const [notifications, setNotifications] = useState<{ message: string }[]>([]);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    socket.on("receiveNotification", (data) => {
+      setNotifications((prev) => [...prev, data]);
+    });
+  }, []);
+
+  const sendNotification = () => {
+    const data = { department: "non-admin", message };
+    socket.emit("sendNotification", data);
+    setMessage("");
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <h1>Admin Notification System</h1>
+      <input
+        type="text"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Enter notification message"
+      />
+      <button onClick={sendNotification}>Send Notification</button>
+      <ul>
+        {notifications.map((notif, index) => (
+          <li key={index}>{notif.message}</li>
+        ))}
+      </ul>
     </div>
   );
 }
