@@ -1,8 +1,9 @@
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
-import mongoose, { Schema, Document } from "mongoose";
 import cors from "cors";
+import { INotification } from "./models/model";
+const { db } = require("../firebase");
 
 const app = express();
 app.use(cors());
@@ -13,30 +14,6 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
   },
 });
-
-// Connect to MongoDB
-mongoose
-  .connect("mongodb://localhost:27017/notifications")
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.log(err));
-
-// Define Notification Schema and Interface
-interface INotification extends Document {
-  department: string;
-  message: string;
-  timestamp: Date;
-}
-
-const notificationSchema: Schema = new Schema({
-  department: { type: String, required: true },
-  message: { type: String, required: true },
-  timestamp: { type: Date, default: Date.now },
-});
-
-const Notification = mongoose.model<INotification>(
-  "Notification",
-  notificationSchema
-);
 
 io.on("connection", (socket) => {
   console.log("A user connected");
@@ -54,14 +31,12 @@ io.on("connection", (socket) => {
   });
 
   // Send notification to a specific department
-  socket.on(
-    "sendNotification",
-    async (data: { department: string; message: string }) => {
-      const notification = new Notification(data);
-      await notification.save();
-      io.to(data.department).emit("receiveNotification", data);
-    }
-  );
+  socket.on("sendNotification", async (data: INotification) => {
+    // const notification = new Notification(data);
+    // await notification.save();
+    db.collection("notifications").add(data);
+    io.to(data.department).emit("receiveNotification", data);
+  });
 
   socket.on("connect_error", (err) => {
     console.error("Connection error:", err.message);
