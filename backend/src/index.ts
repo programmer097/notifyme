@@ -47,6 +47,12 @@ io.on("connection", (socket) => {
     console.log(`User joined department: ${department}`);
   });
 
+  // Leave a room based on department
+  socket.on("leaveDepartment", (department: string) => {
+    socket.leave(department);
+    console.log(`User left department: ${department}`);
+  });
+
   // Send notification to a specific department
   socket.on(
     "sendNotification",
