@@ -41,6 +41,10 @@ jobs:
         run: |
           ls -l private_key.pem
 
+      - name: Remove Old Host Key Entry
+        run: |
+          ssh-keygen -R ${{ secrets.EC2_PUBLIC_IP }}
+
       - name: Test SSH Connection
         run: |
           ssh -i private_key.pem ec2-user@${{ secrets.EC2_PUBLIC_IP }} 'echo "SSH Connection Successful"'
