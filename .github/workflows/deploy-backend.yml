@@ -31,7 +31,7 @@ jobs:
       - name: Get Secret from Secrets Manager
         id: get_secret
         run: |
-          aws secretsmanager get-secret-value --secret-id $${{ secrets.AWS_SECRET_ARN }} --query 'SecretString' --output text > private_key.pem
+          aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:eu-north-1:288761728287:secret:dev-ev2-private-key-Z5SZsC --query 'SecretString' --output text > private_key.pem
 
       - name: Verify Key Contents (Optional)
         run: |
