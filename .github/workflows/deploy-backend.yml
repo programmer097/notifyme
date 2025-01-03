@@ -33,6 +33,10 @@ jobs:
         run: |
           aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:eu-north-1:288761728287:secret:ec2-ssh-key-d4xg0M --query 'SecretString' --output text > private_key.pem
 
+      - name: Verify Key Contents (Optional)
+        run: |
+          head -c 10 private_key.pem # Check for expected key content (e.g., "-----BEGIN RSA PRIVATE KEY-----")
+
       - name: Copy files to EC2 instance
         uses: appleboy/scp-action@v0.1.7
         with:
