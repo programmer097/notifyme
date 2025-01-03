@@ -50,7 +50,7 @@ jobs:
 
       - name: Test SSH Connection
         run: |
-          ssh -i /tmp/private_key.pem ec2-user@${{ secrets.EC2_PUBLIC_IP }} 'echo "SSH Connection Successful"'
+          ssh -i /tmp/private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_PUBLIC_IP }} 'echo "SSH Connection Successful"'
 
       - name: Copy files to EC2 instance
         uses: appleboy/scp-action@v0.1.7
