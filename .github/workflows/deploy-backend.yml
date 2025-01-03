@@ -1,0 +1,42 @@
+name: Deploy Node.js App to EC2
+
+on:
+  push:
+    branches:
+      - dev # Deploy on pushes to the 'dev' branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Install Node.js and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nodejs npm 
+          npm install
+
+      - name: Build the application
+        run: npm run build -w backend
+
+      - name: Copy files to EC2 instance
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: githubActionUser # Or your username
+          key: ${{ secrets.YOUR_AWS_KEY_PAIR }}
+          source: ./backend/dist/ # Replace with your build output directory
+          target: /home/ec2-user/app/
+
+      - name: Start the application on EC2
+        run: |
+          ssh -i ${{ secrets.YOUR_AWS_KEY_PAIR }} ec2-user@${{ secrets.EC2_PUBLIC_IP }} 'cd /home/ec2-user/app/ && npm start'
