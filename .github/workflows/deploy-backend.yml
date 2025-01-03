@@ -33,31 +33,30 @@ jobs:
         run: |
           aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:eu-north-1:288761728287:secret:dev-ev2-private-key-Z5SZsC --query 'SecretString' --output text > private_key.pem
 
-      - name: Verify Key Contents (Optional)
-        run: |
-          head -c 10 private_key.pem # Check for expected key content (e.g., "-----BEGIN RSA PRIVATE KEY-----")
-
       - name: Verify Key Permissions
         run: |
           ls -l private_key.pem
 
-      - name: Remove Old Host Key Entry
+      - name: Prepare SSH Environment
         run: |
           mkdir -p ~/.ssh
           touch ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
+
+      - name: Remove Old Host Key Entry
+        run: |
           ssh-keygen -R ${{ secrets.EC2_PUBLIC_IP }}
 
       - name: Test SSH Connection
         run: |
-          ssh -i private_key.pem ec2-user@${{ secrets.EC2_PUBLIC_IP }} 'echo "SSH Connection Successful"'
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_PUBLIC_IP }} 'echo "SSH Connection Successful"'
 
       - name: Copy files to EC2 instance
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_PUBLIC_IP }}
-          username: githubActionUser
-          key: ${{ steps.get_secret.outputs.key_file }}
+          username: ec2-user
+          key: private_key.pem
           source: ./backend/dist/
           target: /home/ec2-user/app/
 
