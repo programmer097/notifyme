@@ -43,6 +43,9 @@ jobs:
 
       - name: Remove Old Host Key Entry
         run: |
+          mkdir -p ~/.ssh
+          touch ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
           ssh-keygen -R ${{ secrets.EC2_PUBLIC_IP }}
 
       - name: Test SSH Connection
