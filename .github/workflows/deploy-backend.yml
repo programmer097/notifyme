@@ -31,7 +31,7 @@ jobs:
       - name: Get Secret from Secrets Manager
         id: get_secret
         run: |
-          aws secretsmanager get-secret-value --secret-id ${{secrets.AWS_SECRET_ARN}} --query 'SecretString' --output text > private_key.pem
+          aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:eu-north-1:288761728287:secret:ec2-ssh-key-d4xg0M --query 'SecretString' --output text > private_key.pem
 
       - name: Copy files to EC2 instance
         uses: appleboy/scp-action@v0.1.7
