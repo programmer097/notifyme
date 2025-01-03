@@ -28,15 +28,20 @@ jobs:
       - name: Build the application
         run: npm run build -w backend
 
+      - name: Get Secret from Secrets Manager
+        id: get_secret
+        run: |
+          aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:secret:ec2-ssh-key-XXXXXXXXXX --query 'SecretString' --output text > private_key.pem
+
       - name: Copy files to EC2 instance
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_PUBLIC_IP }}
-          username: githubActionUser # Or your username
-          key: ${{ secrets.YOUR_AWS_KEY_PAIR }}
-          source: ./backend/dist/ # Replace with your build output directory
+          username: githubActionUser
+          key: ${{ steps.get_secret.outputs.key_file }}
+          source: ./backend/dist/
           target: /home/ec2-user/app/
 
       - name: Start the application on EC2
         run: |
-          ssh -i ${{ secrets.YOUR_AWS_KEY_PAIR }} ec2-user@${{ secrets.EC2_PUBLIC_IP }} 'cd /home/ec2-user/app/ && npm start'
+          ssh -i private_key.pem ec2-user@${{ secrets.EC2_PUBLIC_IP }} 'cd /home/ec2-user/app/ && npm start'
